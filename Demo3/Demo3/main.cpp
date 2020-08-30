@@ -10,8 +10,8 @@ static void on_HoughCircles(int, void*);
 
 
 int main() {
-	g_scrImage = imread("4.png");
-	g_scrImagecopy = imread("4.png");
+	g_scrImage = imread("test.png");
+	g_scrImagecopy = imread("test.png");
 	imshow("SourceImage", g_scrImage);
 
 
