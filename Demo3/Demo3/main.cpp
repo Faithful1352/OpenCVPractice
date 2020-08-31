@@ -10,21 +10,29 @@ static void on_HoughCircles(int, void*);
 
 
 int main() {
+
+	//导入需要检测的图片
 	g_scrImage = imread("test.png");
 	g_scrImagecopy = imread("test.png");
+	//显示未检测的图片
 	imshow("SourceImage", g_scrImage);
 
-
+	
 	namedWindow("Design Sketch");
 	//createTrackbar("yuzhi", "Design Sketch", &g_nthreshold, 30, on_HoughCircles);
+	//进行霍夫圆检测
 	on_HoughCircles(1.5, 0);
+	//按q结束程序
 	while (char(waitKey()) != 'q') {}
 	return 0;
 }
 static void on_HoughCircles(int, void*) {
+	//转换成灰色图像
 	cvtColor(g_scrImage, g_midImage, COLOR_BGR2GRAY);
-	GaussianBlur(g_midImage, g_midImage, Size(9, 9), 2, 2);//必须要用高斯blur。
+	//进行高斯滤波
+	GaussianBlur(g_midImage, g_midImage, Size(9, 9), 2, 2);
 	double g_nthresholdcopy = (double)12 / 10;
+	//霍夫圆检测
 	HoughCircles(g_midImage, circles, HOUGH_GRADIENT, g_nthresholdcopy, g_midImage.rows / 20, 100, 60, 0, 0);//输入图像为灰度图
 	for (size_t i = 0; i < circles.size(); i++) {
 		//提取出圆心坐标
@@ -36,6 +44,7 @@ static void on_HoughCircles(int, void*) {
 		//圆
 		circle(g_scrImage, center, radius, Scalar(0, 0, 255), 3, 8, 0);
 	}
+	//显示霍夫圆检测后的图片
 	imshow("Design Sketch", g_scrImage);
 	g_scrImage = g_scrImagecopy.clone();
 }
