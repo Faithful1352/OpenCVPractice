@@ -4,8 +4,8 @@
 using namespace std;
 using namespace cv;
 
+//函数声明
 static void on_HoughCircles(int, void*);
-
 void findSquares(const Mat& image, Mat &out);
 static double angle(Point pt1, Point pt2, Point pt0);
 void findAngle(const Mat& image, Mat &out);
@@ -14,23 +14,28 @@ Mat src_input, src_output, g_midImage;
 vector<Vec3f>circles;
 
 int main() {
+	//导入待检测的图片
 	src_input = imread("test.png");
 	src_output = imread("test.png");
 
-
+	//获取输入的命令
 	string s;
 	cin >> s;
 
+	//检测不同的图形
 	int i = (s == "circle") ? 0 : (s == "rectangle") ? 1 : 2;
 	switch (i)
 	{
 	case 0:
+		//检测圆
 		on_HoughCircles(1.5, 0);
 		break;
 	case 1:
+		//检测矩形
 		findSquares(src_input, src_output);
 		break;
 	case 2:
+		//检测三角形
 		findAngle(src_input, src_output);
 	default:
 		break;
@@ -44,11 +49,14 @@ int main() {
 
 
 
-
+//检测圆
 static void on_HoughCircles(int, void*) {
+	//转换成灰色图像
 	cvtColor(src_input, g_midImage, COLOR_BGR2GRAY);
-	GaussianBlur(g_midImage, g_midImage, Size(9, 9), 2, 2);//必须要用高斯blur。
+	//进行高斯滤波
+	GaussianBlur(g_midImage, g_midImage, Size(9, 9), 2, 2);
 	double g_nthresholdcopy = (double)12 / 10;
+	//霍夫圆检测
 	HoughCircles(g_midImage, circles, HOUGH_GRADIENT, g_nthresholdcopy, g_midImage.rows / 20, 100, 60, 0, 0);//输入图像为灰度图
 	for (size_t i = 0; i < circles.size(); i++) {
 		//提取出圆心坐标
@@ -60,6 +68,7 @@ static void on_HoughCircles(int, void*) {
 		//圆
 		circle(src_output, center, radius, Scalar(0, 0, 255), 3, 8, 0);
 	}
+	//显示霍夫圆检测后的图片
 	imshow("Design Sketch", src_output);
 }
 
@@ -69,7 +78,7 @@ static void on_HoughCircles(int, void*) {
 
 
 
-//第一个参数是传入的原始图像，第二是输出的图像。
+//检测矩形
 void findSquares(const Mat& image, Mat &out)
 {
 	int thresh = 100, N = 5;
@@ -167,8 +176,9 @@ static double angle(Point pt1, Point pt2, Point pt0)
 	return (dx1*dx2 + dy1 * dy2) / sqrt((dx1*dx1 + dy1 * dy1)*(dx2*dx2 + dy2 * dy2) + 1e-10);
 }
 
-//检测矩形
-//参数(源图像,输出图像)
+
+
+//检测三角形
 void findAngle(const Mat& image, Mat &out)
 {
 	int thresh = 500, N = 5;
@@ -186,7 +196,7 @@ void findAngle(const Mat& image, Mat &out)
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
 
-	//在图像的每个颜色通道中查找矩形
+	//在图像的每个颜色通道中查找三角形
 	for (int c = 0; c < image.channels(); c++)
 	{
 		int ch[] = { c, 0 };
@@ -221,7 +231,7 @@ void findAngle(const Mat& image, Mat &out)
 				//使用图像轮廓点进行多边形拟合
 				approxPolyDP(Mat(contours[i]), approx, arcLength(Mat(contours[i]), true)*0.02, true);
 
-				//计算轮廓面积后，得到矩形4个顶点
+				//计算轮廓面积后，得到矩形3个顶点
 				if (approx.size() == 3 && fabs(contourArea(Mat(approx))) > 1000 && isContourConvex(Mat(approx)))
 				{
 					double minDist = 1e10;
